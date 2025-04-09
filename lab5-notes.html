@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel = "stylesheet" href = "style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Albert+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <title>Notes | Real-Time Scheduling</title>
+</head>
+<body>
+    <h1>Lab 5 Notes: Real-Time Scheduling</h1>
+    <h2>Conventional Scheduling</h2>
+    <h3>Major Scheduling Algorithms</h3>
+    <p>
+        Scheduling algorithms explains how different processes share the CPU.
+        It is the strategy used to pick a ready task for execution.
+        It tells the processor, from the list of processes in the ready queue which one should run next.
+        The scheduler is what "process_select" does.
+    </p>
+    <ul>
+        <li>
+            Preemptive scheduling: The running task can be temporarily suspended to execute another task.
+            <ul>
+                <li>
+                    Process context switch out of CPU and give CPU to a different process.
+                </li>
+                <li>
+                    Round Robin (RR) - able to interrupt the process, take execution away even when process itself is not done.
+                    This gives the illusion that processes can run parallel on single CPU that can make progress on one time.
+                </li>
+                <li>
+                    Shortest Job First (SJF) --> Shortest Time-to-Completion First (STCF) (also online)
+                </li>
+                <li>
+                    Priority Scheduling - More important process can take execution away from less important process.
+                </li>
+            </ul>
+        </li>
+        <li>
+            Non-preemptive scheduling: The running task cannot be suspended
+            <ul>
+                <li>
+                    All scheduler gets to decide is which process gets to start, and once it starts, that process runs to completion.
+                </li>
+                <li>
+                    Analogy: More customers at store checkout line, and each check out line has a server (CPU) that service the customer (processes that is ready to run) that is waiting.
+                    What strategies are there for assigning different customers to different checkoutlines, so either: average waiting time for everybody is reduced, fairness, etc. 
+                    The perspective of a store manager, with an overview of all the CPUs and all the waiting processes, and can tell one process (customer) to go to one particular CPU (checkout line) at one particular time.
+                </li>
+                <li>
+                    First Come First Served (FCFS)
+                </li>
+                <li>
+                    Shortest Job First (SJF)
+                </li>
+            </ul>
+        </li>
+        <li>
+            Online scheduler: Get more request for tasks as it is running.
+            <ul>
+                <li>First Come First Served (FCFS)</li>
+                <li>Scheduler does something sensible as new tasks arrive, so these new tasks can be scheduled.</li>
+                <li>
+                    Priority Scheduling
+                </li>
+            </ul>
+        </li>
+        <li>
+            Offline scheduler: Needs to know all the tasks beforehand then try to come up with a scheduling policy for these tasks.
+            <ul>
+                <li>
+                    For real-time scheduling, there are reasonable cases where an offline scheduler is needed.
+                    For example, we know that there are 10 tasks that needs to be done, will be useful to come up very carefully what type of schedule should run. 
+                </li>
+                <li>
+                    For SJF, assume we have a bucket of jobs at time 0, so we need to figure out what order the jobs are in.
+                </li>
+            </ul>
+        </li>
+        <li>
+            Heuristic scheduler: came up with policy that is reasonable but no mathematical optimization taking place. No nice formula.
+            <ul>
+                <li>First Come First Served (FCFS)</li>
+            </ul>
+        </li>
+        <li>
+            Not Heuristic
+            <ul>
+                <li>
+                    Shortest Job First (SJF) Scheduling
+                </li>
+            </ul>
+        </li>
+        <img src = "image/scheduling-algorithm.png" alt = "scheduling-algorithm">
+    </ul>
+    <h4>Scheduling Algorithm Categories</h4>
+    <ul>
+        <li>
+            Preemptive or Non-preemptive
+        </li>
+        <li>
+            Static or Dynamic
+            <ul>
+                <li>
+                    Are scheduling decisions based on parameters that change with time? (yes --> dynamic)
+                </li>
+                <li>
+                    Fixed-priority vs. dynamic-priority
+                </li>
+                <li>
+                    Priority Scheduling can be both static (if priorities doesn't change) or dynamic (if priorities changes, for example, passing of time).
+                </li>
+            </ul>
+        </li>
+        <li>
+            Online or Offline
+            <ul>
+                <li>
+                    Are the decisions made a priori with knowledge of task activations (online), 
+                    or are they taken at run time based on the set of active tasks (offline).
+                </li>
+            </ul>
+        </li>
+        <li>
+            Optimal or Heuristic
+            <ul>
+                <li>
+                    Can you prove that the algoritm is optimal (write down some quantity that we want to optimize) in terms of a criteria or not? (no --> heuristic)
+                </li>
+                <li>
+                    For example, for average response time, there is no scheduler that is non-preemptive that optimize better than STF, in minimizing the average response time.
+                </li>
+            </ul>
+        </li>
+    </ul>
+    <ul>
+        <li>First Come First Serve (FCFS) Scheduling</li>
+        <li>Shortest Job First (SJF) Scheduling</li>
+        <li>Priority Scheduling</li>
+        <li>Round Robin Scheduling (RR)</li>
+    </ul>
+    <h4>Metric Average Response Time</h4>
+    <ul>
+        <li>Task: Each thing a process does --> fixed amount of computation time (green) required on this particular processor.</li>
+        <li>If I give this particular process access to CPU, it will take this much time (green) to finish it.</li>
+        <li>Computation Time: C<sub>i</sub> = f<sub>i</sub> - s<sub>i</sub></li>
+        <li>
+            Request Time: r<sub>i</sub> marks whenever we receive a new task.
+            <ul>
+                <li>r<sub>i</sub> < d<sub>i</sub></li>
+            </ul>
+        </li>
+        <li>Response Time: R<sub>i</sub> = f<sub>i</sub> - r<sub>i</sub> --> time it takes from the request to come in to the job to finish.</li>
+        <li>
+            Average Response Time: summation (1/n) of response time --> expectation of R, to measure quality of a scheduler given a bunch of tasks.
+            <ul>
+                <li>Better if the average response time is less.</li>
+            </ul>
+        </li>
+        <li>Deadline: d<sub>i</sub> results from when request is being made.</li>
+        <li>Goal: Minimize the average time that a customer (job) waits in the line (ready queue).</li>
+    </ul>
+    <img src = "image/metric-average-response-time.png" alt = "Metric Average Reponse Time">
+    <h4>First Come First Served (FCFS)</h4>
+    <p>Process these tasks in the order that the tasks are received.</p>
+    <h5>Problem:</h5>
+    <p>
+        One long task can kind of "block" a lot of shorter tasks. 
+        For example, first customer takes a long time at the cash register, 
+        is the first customer to go because it arrives at the cash register before the other customers, maybe just by a little bit.
+    </p>
+    <ul>
+        <li>Perspective of the customer (specific process/task): super annoying</li>
+        <li>Persepective of the system: unpredictable wait time due to response time depends stronly on task arrival time.</li>
+        <li>Thus, FCFS scheduling is not sutable for real-time systems.</li>
+    </ul>
+    <p>A better scheduling policy is need!</p>
+    <h4>Shortest Job First (SJF) Scheduling</h4>
+    <p>
+        Look at how much item each customer wants to check out, 
+        let the customer with a smaller number of items check out first even if they arrived at the line late. T
+        his is optimal in terms of average response time, minimizing average response time.
+    </p>
+    <ul>
+        <li>Look at the queue (number of tasks avaliable to us for scheduling).</li>
+        <li>Look at computation time for each one.</li>
+        <li>Pick the one with the smallest computation time.</li>
+    </ul>
+    <h5>Problem:</h5>
+    <p>
+        SJF is not optimal for real-time in the sense of feasibility. 
+        In real-time scheduling, we really care about whether or not deadlines are met, more than average response time.
+        With all tasks requested at the same time, r<sub>1</sub>, r<sub>2</sub>, r<sub>3</sub>, 
+        if task 1, being the longest task runs last, it misses it's deadline d<sub>1</sub>. 
+    </p>
+    <img src = "image/SJF-miss-deadline.png" alt = "SJF miss deadline">
+    <p>
+        If SJF is not used, and task 1, task 2, task 3 runs in this order (FCFS),
+        all deadlines d<sub>1</sub>, d<sub>2</sub>, d<sub>3</sub> are met.
+    </p>
+    <img src = "image/FCFS-meet-deadline.png" alt = "FCFS meet deadline">
+    <p>SJF can result in deadline not met and both SJF and FCFS can lead to starvation 
+        (starve long processes preventing it from running, 
+        starve short process because first job too long, respectively).
+        SFJ is optimal with respect to response time, but optimality does not equal feasibility, 
+        meaning deadlines might not be met.
+    </p>
+    <h5>Solutions:</h5>
+    <ul>
+        <li>
+            Priority queues where short jobs and long jobs are treated differently.
+            <ul>
+                <li>
+                    Analogy: express check out lines for short jobs, or when a flight is taking off, 
+                    let faster passenger, those without luggage for example, go to express checkout line, 
+                    so fewest people possible misses their flights.
+                </li>
+                <li>
+                    In each type of job (different queues), try to do FCFS. Reshuffle FCFS queue which helps with fairness.
+                </li>
+            </ul>
+        </li>
+        <li>
+            Priority Scheduling
+        </li>
+        <li>
+            Round Robin Scheduling (RR)
+        </li> 
+    </ul>
+    <h4>Priority Scheduling</h4>
+    <p>
+        Assign processes a number (priority) that could be related to computational time (shorter computational time, higher priority) or something else. 
+    </p>
+    <ul>
+        <li>
+            Use computation time as the priority, where shorter computation time at higher priority.
+        </li>
+        <li>
+            Task with highest priority is selected first.
+        </li>
+        <li>
+            Tasks with same priority are scheduled using FCFS.
+        </li>
+    </ul>
+    <h5>Problem:</h5>
+    <ul>
+        <li>
+            Starvation:
+            <ul>
+                <li>
+                    Low priority tasks (jobs with long computation time, etc.) may experience very long delays due to preemption by higher priority tasks.
+                </li>
+                <li>
+                    Common approach to handle starvation: Aging - priority increases with waiting time.
+                </li>
+            </ul>
+        </li>
+        <li>
+            Real-time operation systems mostly implements priority scheduling, 
+            because priority scheduling can implement other policies (SJF, FCFS, etc.)
+        </li>
+    </ul>
+    <h4>Round Robin Scheduling (RR)</h4>
+    <ul>
+        <li>
+            The ready queue is FCFS.
+        </li>
+        <li>
+            However, each task cannot execute more than Q time units (the quantum). 
+            Tasks are chopped up into little bits, 
+            and all ready processes run at decrease speed due to having to having to split time between multiple processes.
+        </li>
+        <li>
+            When Q time units have elapsed, the task is put back into the ready queue (back of the "line").
+        </li>
+        <li>
+            Shortest process finishes first.
+        </li>
+        <li>
+            Longest process doesn't starve.
+        </li>
+        <li>
+            RR always tries to equalize resources among all processes, fairness.
+        </li>
+    </ul>
+    <img src = "image/round-robin-scheduling.png" alt = "Round Robin Scheduling">
+    <h5>RR Example - no mixing processes --> always green (task 1), purple (task 2), red (task 3)</h5>
+    <img src = "image/RR-example.png" alt = "Round Robin Scheduling example, no mixing">
+
+    <h5>Speed of computation for RR</h5>
+    <p>hhh</p>
+
+
+
+    <h2>Real-Time Scheduling</h2>
+
+
+</body>
+</html>
