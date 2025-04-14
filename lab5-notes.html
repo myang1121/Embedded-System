@@ -261,6 +261,18 @@
             Real-time operation systems mostly implements priority scheduling, 
             because priority scheduling can implement other policies (SJF, FCFS, etc.)
         </li>
+        <li>
+            If p<sub>i</sub> is proportional to 1/C<sub>i</sub> --> 1/(computation time)
+            <ul>
+                <li>Use preemptive version of SJF.</li>
+            </ul>
+        </li>
+        <li>
+            If p<sub>i</sub> = const
+            <ul>
+                <li>FCFS</li>
+            </ul>
+        </li>
     </ul>
     <h4>Round Robin Scheduling (RR)</h4>
     <ul>
@@ -285,17 +297,509 @@
             RR always tries to equalize resources among all processes, fairness.
         </li>
     </ul>
-    <img src = "image/round-robin-scheduling.png" alt = "Round Robin Scheduling">
+    <img src = "image/round-robin-scheduling.png" alt = "Round Robin Scheduling" width = "800">
     <h5>RR Example - no mixing processes --> always green (task 1), purple (task 2), red (task 3)</h5>
-    <img src = "image/RR-example.png" alt = "Round Robin Scheduling example, no mixing">
+    <img src = "image/RR-example.png" alt = "Round Robin Scheduling example, no mixing" width = "800">
 
-    <h5>Speed of computation for RR</h5>
-    <p>hhh</p>
+    <h5>Advantage of RR over SJF/STCF?</h5>
+    <ul>
+        <li>All processes run all the time (no starvation)</li>
+        <li>Shortest jobs complete first</li>
+        <li>"Fairly" splits resources</li>
+    </ul>
 
+    <h5>RR Scehduling Properties</h5>
+    <ul>
+        <li>
+            If there are n tasks in the system
+            <ul>
+                <li>
+                    Each repeating sequence in the schedule is length nQ.
+                </li>
+                <li>In each repeating sequence, a task gets Q units of time</li>
+                <li>
+                    Suppose context switch time δ is much less than Q, but Q is also small --> R<sub>i</sub> response time is the same for each task, context switch time δ negligible,
+                    each task runs as if it were executing on a virtual processor that is n times slower than the real one. There is an illusion that all these processes are running at the same time. Each process runs at 1/n speed.
+                </li>
+                <li>
+                    If Q is very large
+                    <ul>
+                        <li>
+                            RR = FCFS --> not much optimization 
+                        </li>
+                        <li>
+                            No context switch due to RR triggered timer interrut (task often finish before Q time elapsed --> never gets a context switch).
+                        </li>
+                    </ul>
 
+                </li>
+            </ul>
+        </li>
+    </ul>
 
-    <h2>Real-Time Scheduling</h2>
+    <h4>Note about non real-time scheduling</h4>
+    <ul>
+        <li>Worry about completion time C<sub></sub>, fairness, starvation. </li>
+        <li>Don't really worry about deadline (real-time scheduling cares mostly about deadline).</li>
+    </ul>
 
+    <h2>Real-Time (RT) Scheduling</h2>
+    <p>
+        Instead of focusing on throughput, waiting time, and starvation, real-time scheduling focuses on meeting deadlines. Each process have additional information on timing constraints, external constraints on Computation
+        Many computing systems need to respond to events within precise timing constraints.
+        There is a tight interaction between sensing and actuation, which need predictable timing of operations.
+        The control theory quantifies the effect of delays or stability.
+    </p>
+    <img src = "image/sensing-actuation.png" alt = "Diagram of controller, sensors, and physical world" width = "800">
+    <h3>Real-Time Systems</h3>
+    <p>Computing system that is able to respond to events within precise timing constraints.</p>
+    <ul>
+        <li>Correct operation depends on properties such as produing correct output, and the time which the output is produced.</li>
+        <li>Time between different entities must be synchronized (all participants in the real-time system must work in the same time frame, like the real world).</li>
+        <li>For example, 1ms is exactly 1ms, not a fraction of it. Deadlines specify must make sense.</li>
+        <li>Systems with multiple tasks with varying criticality levels (really clear which tasks are critical/important).</li>
+        <li>Real time is not the same as fast.</li>
+    </ul>
+    <h3>Terminologies</h3>
+    <ul>
+        <li>
+            Hard real-time tasks: Must meet their deadlines --> catastrophic consequences
+            <ul>
+                <li>For example, low-level (high performance) control such as stability control for rockets, attitude control for airplanes, surgical robots.</li>
+                <li>Meeting deadlines --> predictability more important than performance.</li>
+            </ul>
+        </li>
+        <li>Soft-real-time tasks: Just want things to meet most of the deadlines --> System performance degrades is starting to miss deadlines, but nothing terrible happens.
+            <ul>
+                <li>For example, reading keyboard input, want to make sure each key responds to about 2ms of being press.</li>
+                <li>Otherwise delay in response can ruin user experience). Once in a while a key lags is okay.</li>
+                <li>Other examples, displaying a message, update graphics.</li>
+            </ul>
+        </li>
+        <li>Tasks can be assigned priorities to determine hard real-time systems and soft real-time systems.</li>
+        <li>
+            Job: A unit of work that is scheduled and executed by the system.
+        </li>
+        <li>
+            Task (process): A sequence (possibly infinite) of jobs, which jointly provide some system functions.
+        </li>
+        <li>
+            A job has:
+            <ul>
+                <li>
+                    Request time r<sub>i</sub> (arrival time)
+                </li>
+                <li>
+                    Start time s<sub>i</sub>
+                </li>
+                <li>
+                    Finish time f<sub>i</sub>
+                </li>
+                <li>
+                    Computation/execution time C<sub>i</sub>
+                    <ul>
+                        <li>
+                            Total amount of CPU access that particular process needs in orfer to finish.
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    Absolute deadline d<sub>i</sub>
+                    <ul>
+                        <li>
+                            Often specify with respect to R (Response time), absolute time --> "It needs to arrive/finish within 10 seconds, or some milisecond, etc."
+                        </li>
+                        <li>
+                            The scheduler figures out which tasks to run when, 
+                            and hopefully the computation time that the task needs finishes before the deadline.
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    Relative deadline D<sub>i</sub> = d<sub>i</sub> - r<sub>i</sub>
+                    <ul>
+                        <li>
+                            Defined relative to request/arrival time r<sub>i</sub>.
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+        <li>
+            Task can have a single job, task can have multiple jobs (start and stop at multiple times, randomly arriving, etc.).
+        </li>
+        <li>
+            Periodic task (time driven) vs aperiodic task (event-driven)
+        </li>
+        <li>
+            Feasible schedule (given many tasks, with computation times, arrival times, and deadlines)
+            <ul>
+                <li>
+                    A set of schedule sigma σ is feasible if all tasks are able to complete with their set constraints, meet all their deadlines.
+                </li>
+                <li>
+                    A set of tasks capital gamma Γ is schedulable if a feasible schedule exists (all tasks complete all set of constraint).
+                </li>
+            </ul>
+        </li>
+    </ul>
+
+    <h3>Performance vs predictability</h3>
+    <p>
+        Real time has to guarantee time properties (meeting deadlines), while performance minimize average response time. 
+        Processors and systems made for soft real time constraints and performance are difficult to get predictable behavior.
+        For example, performance optimize CPUs that runs on laptop, desktop, etc., has many features that improve performance but detremental to implementing hard real-time systems.
+    </p>
+    <h4>Source of unpredictability</h4>
+    <ul>
+        <li>
+            Architecture: cache (temporary buffer to increase memory access times), pipelining,... --> performance feature that makes predictability harder (if cache misses, etc. --> why Cortex M series doesn't have cache or very deep pipeline, but meant for predictable behaviors, such as "this interrupt will be serviced within 12 cycles, always.")
+        </li>
+        <li>
+            Run-time system: scheduling, other tasks, ...
+        </li>
+        <li>
+            Environment: Bursty information flow, extreme conditions, ...
+        </li>
+        <li>
+            Input: no explicit notion of time in more language, ...
+        </li>
+    </ul>
+
+    
+    <h3>Scheduling</h3>
+    <p>
+        A schedule is a particular assignment of tasks (jobs) to the processor. It assigns every point in time to a task.
+    </p>
+    <img src = "image/schedule.png" alt = "scheduling example" width = "800">
+    <ul>
+        <li>
+            Each integer value for schedule sigma σ correspond to tasks that are actually running.
+        </li>
+        <li>
+            If no task running, sigma σ = 0 --> idle process in an operating system
+        </li>
+        <li>
+            Time slice: chunck where schedule is constant.
+        </li>
+        <li>
+            Context switch: discontinuity (start from idle, jump from task 1, to task 2, to task 1, to task 3, go back idle --> all tasks are done)
+        </li>
+    </ul>
+    <h4>General problem</h4>
+    <p>
+        Given a set of tasks capital gamma Γ, a set of processors P, and a set of resources R, find an assignment of P and R that produces a feasible schedule.
+    </p>
+    <ul>
+        <li>
+            For low level periodic control, often do knows all tasks Γ ahead of time, but need to make sure that Γ can all be fit into computation budget and meet all the timelines. 
+        </li>
+    </ul>
+    <h3>Drived Parameters</h3>
+    <p>Many drived parameter depends on deadline, so come up with optimal schedules, minimize or optimize some of these quantities, for real-time systems. Come up with schedule that is both optimal (toptimize drived parameters) and feasible (meet all deadlines).</p>
+    <img src = "image/derived-parameters.png" alt = "Derived Parameters" width = "800">
+    <ul>
+        <li>
+            Lateness: L<sub>i</sub> = f<sub>i</sub>-d<sub>i</sub>
+            <ul>
+                <li>
+                    Can be positive (missed deadline), negative (meet deadline), or zero.
+                </li>
+            </ul>
+        </li>
+        <li>
+            Tardiness(lateness, L<sub>i</sub>) L<sub>i</sub>
+            <ul>
+                <li>
+                    Can only be from 0 to positive value.
+                </li>
+                <li>
+                    How much deadline missed.
+                </li>
+            </ul>
+        </li>
+        <li>
+            Computation/execution time C<sub>i</sub> = f<sub>i</sub> - s<sub>i</sub> (assume continuous)
+            <ul>
+                <li>
+                    Residual computation time: c<sub>i</sub>(t) --> pick any time t from s<sub>i</sub> to f<sub>i</sub>, c<sub>i</sub> is the time from t to finish f<sub>i</sub>, how much time there are left before process can finish.
+                </li>
+            </ul>
+        </li>
+        <li>
+            Slack: X<sub>i</sub>(t) = d<sub>i</sub> - c<sub>i</sub> (t)
+            <ul>
+                <li>
+                    How much extra space is there from residual computation time to deadline.
+                </li>
+            </ul>
+        </li>
+        <li>
+            Response time: R<sub>i</sub> = f<sub>i</sub> - r<sub>i</sub>
+            <ul>
+                <li>
+                    Finish time minus the arrival time.
+                </li>
+            </ul>
+        </li>
+        
+    </ul>
+
+    <h3>Jitters</h3>
+    <p>Jitter is the time variation for the computation within each period, time variation of a periodic event.</p>
+    <img src = "image/completion-time-jitter.png" alt = "Completion Time Jitter Example" width = "800">
+    <ul>
+        <li>
+            Each period, all deadlines are met, but when finish within each period, it is all over the place.
+        </li>
+        <li>
+            For computations such as Fourier analysis or signal processing, normally assume evenly spaced signals, and in those cases, jitter should be minimize in the schedule.
+        </li>
+        <li>
+            Sometimes, minimize jitter instead of maximizing throughout.
+        </li>
+        <li>
+            max<sub>k</sub>(f<sub>i,k</sub> - s<sub>i,k</sub>) - min<sub>k</sub>(f<sub>i,k</sub>)
+        </li>
+    </ul>
+
+    <h3>Resource Constraints</h3>
+    <p>Resource constraints that we use locks to protect, share resources, presents some problems in scheduling.</p>
+    <ul>
+        <li>Resources may be limited or even unavailable</li>
+        <li>Shared resources may require mutual exclusion (one process can access resource at a time)</li>
+    </ul>
+    <h4>When resource conflict is added to real time scheduling:</h4>
+    <img src = "image/resource-constraints.png " alt = "Two processes that demonstrates resource constraints" width = "800">
+    <ul>
+        <li>
+            Purple process is longer --> arrives earlier and have a later deadline.
+        </li>
+        <li>
+            The green process has higher priority (lower number, lower timeline), comes in an preemp (the running purple task temporarily suspended to execute higher priority green task.)
+        </li>
+    </ul>
+    <p>
+        Red section (critical section) is protected by a lock ensures mutual exclusion between these two processes. 
+    </p>
+    <img src = "image/resource-constraints-lock.png" alt = "Two processes that demonstrates resource constraints, but with lock that ensures mutual exclusion" width = "800">
+    <ul>
+        <li>
+            Even though the green process has a higher priority, it will try to acquire the lock but fails, so execution has to go back to the purple process, 
+            so the purple session can finish running the rest of the critical session.
+        </li>
+        <li>
+            Then green session acquires the lock, get through the critical session, then finish its noncritical session.
+        </li>
+        <li>
+            Green process still meets its deadline, but its slack is a lot lower (difference between residual computation time and deadline).
+        </li>
+    </ul>
+
+    <h3>Faster Processor</h3>
+    <p>Having a faster processor doesn't automatically mean it is easier to meet deadlines.</p>
+    <img src = "image/faster-processor-fails-deadline-part1.png" alt = "Two process, deadline meet" width = "800">
+    <ul>
+        <li>
+            The purple process starts first, the green process comes in with shorter deadline and higher priority, the green process gets to the critical session first and continues running. 
+        </li>
+        <li> 
+            preemp --> switch out green process, switch in purple process. 
+        </li>
+        <li>
+            The purpole process continues running, critical section  then non critical section of purple process.
+        </li>
+    </ul>
+    <p>
+        The purple process is now faster (2 times speed, on the line plot, 1/2 as big), but the schedule is no longer feasible.
+        The green process fails to meet deadline because purple process reach and access the critical section first, causing the green process to wait its turn to enter the critical section.
+    </p>
+    <img src = "image/faster-processor-fails-deadline-part2.png" alt = "Two times faster process,  everything smaller by 1/2, deadline fails to meet" width = "800">
+    <ul>
+        <li>
+            The green process preemp the purple process only for a little bit, before getting into a resource conflict, giving the execution back to the purple process.
+        </li>
+        <li>
+            The critical section of the purple process is big enough to make the green process miss its deadline.
+        </li>
+        <li>
+            Computational system can speed processes up, but the deadlines aren't from the computational system, 
+            and does not scale well, resulting in failing to meet deadline.
+        </li>
+    </ul>
+
+    <h3>Aperiodic Real-Time Scheduling Algorithms.</h3>
+    <p>
+        Earliest Due Date Scheduler (EDD) and Earliest Deadline Scheduler (EDF) both tries to minimize the same metric, 
+        maximum lateness L<sub>max</sub> = max(L<sub>i</sub>), that looks at all the jobs, and find positive lateness (at least 1 of the jobs has miss its deadlines). 
+        When L<sub>max</sub> <= 0, this means that no tasks misses its deadline.
+    </p>
+    <img src = "image/SJF-miss-deadline-real-time-scheduling.png" alt = "Shortest Job First misses deadline in real-time-scheduling" width = "800">
+    <p>
+        Shortest Job First (SJF) in real-time scheduling has shorter average wait time, but might miss the deadline of process 1, because its deadline is the earliest but has the lowest priority and runs last.
+    </p>
+    <img src = "image/longer-average-wait-time-meet-deadline.png" alt = "Schedule has longer average wait time but meet deadline." width = "800">
+    <p>
+        This schedule has longer average wait time but is feasible --> better schedule than SJF.
+    </p>
+    <h4>Earliest Due Date Scheduler (EDD)</h4>
+    <ul>
+        <li>
+            Offline, non-preemptive version, similar to SJF, but instead of focusing on response time, focuses on due date.
+        </li>
+        <li>
+            Strategy: select the task with the earliest due date (deadline), and assign it a fixed priority.
+        </li>
+        <li>
+            All tasks arrive at the same time (equal arrival time) --> offline
+            <ul>
+                <li>
+                    Fixed priority (d<sub>i</sub> is fixed and known)
+                </li>
+                <li>
+                    Preemption is not an issue (non-preemptive) because no new process arrive midway, no need to switch in and out. 
+                </li>
+                <li>
+                    EDD minimizes the maximum lateness L<sub>max</sub>
+                </li>
+                <li>
+                    If EDD results in L<sub>max</sub> > 0, 
+                </li>
+                <li>
+                    Can directly map onto priority scheduler --> lowest number or earliest deadline results in higher priority 
+                </li>
+            </ul>
+        </li>
+    </ul>
+    <h5>Earliest Due Date Scheduler (EDD) Example</h5>
+    <img src = "image/5-jobs-EDD-example.png" alt = "5 job EDD example" width = "800">
+    <p>
+        There are 5 jobs. The computation time for each job are shown as C<sub>i</sub>. 
+        Job 1 (J<sub>1</sub>) has computation time of C<sub>i</sub> = 1, Job 4 (J<sub>4</sub>) has computation time of C<sub>i</sub> = 3, job 5 (J<sub>5</sub>) has computation time of C<sub>i</sub> = 2, etc.
+        For absolute deadline d<sub>i</sub>, J<sub>1</sub> to  d<sub>i</sub> = 3, J<sub>2</sub> to  d<sub>i</sub> = 10, J<sub>3</sub> to  d<sub>i</sub> = 7, etc.
+    </p>
+    <h5>Earliest Due Date Scheduler (EDD) Example Solution</h5>
+    <img src = "image/5-jobs-EDD-example-solution.png" alt = "5 job EDD example solution" width = "800">
+    <p>
+        Maximum lateness L<sub>max</sub> = -1, due to job 4. L<sub>max</sub> = f<sub>4</sub> - d<sub>4</sub> = 7 - 8 = -1.
+        However, because L<sub>max</sub> is negative (or less than or equal to 0), no job miss the deadline.
+    </p>
+
+    <h5>Jackson's Rule</h5>
+    <p>Given a set of n independent tasks, any algorithm that execites the tasks in order of nondecreasing deadlines is optimal with respect to maximum lateness.</p>
+    <ul>
+        <li>
+            If L<sub>max</sub> (a set of schedules sigma σ) is maxium lateness of a schedule, then:
+            <ul>
+                <li>
+                    Maximum lateness L<sub>max</sub> of EDD schedule is <= Maximum lateness L<sub>max</sub> of some other schedule
+                </li>
+            </ul>
+        </li>
+    </ul>
+    <h5>Schedulability Analysis</h5>
+    <p>
+        How can we check if there is a feasible schedule for a set of tasks capital gamma Γ? --> We can compute L<sub>max</sub> and check if value is less than or equal to 0.
+        If we sort the tasks using EDD and all tasks arrive simultaneously, then f<sub>i</sub> = sum of computation time C<sub>i</sub> of each task.
+    </p>
+
+    <h4>Earliest Deadline Scheduler (EDF)</h4>
+    <ul>
+        <li>
+            The preemptive (running task can be temporary suspended to run another task) version of EDD.
+        </li>
+        <li>
+            Strategy: select the task with the earliest deadline, but tasks can arrive at any time.
+        </li>
+        <li>
+            Tasks may arrive at any time
+            <ul>
+                <li>
+                    Dynamic priority (p<sub>i</sub> depends on arrival and absolute deadline d<sub>i</sub>)
+                </li>
+                <li>
+                    Preemption (context switch) is necessary for optimality (minimize average wait time, faster respond time) and may also reduce lateness.
+                </li>
+                <li>
+                    When new tasks arrive, determine its priority then based on that, determine whether preemption should be done.
+                </li>
+            </ul>
+        </li>
+        <li>
+            EDF also minimizes the maxium lateness L<sub>max</sub>, but with preemptive schedulers.
+        </li>
+    </ul>
+
+    <h5>Earliest Deadline Scheduler (EDF) Example</h5>
+    <img src = "image/EDF-example.png" alt = "EDF example" width = "800">
+    <p>
+        Tasks that arrive with earlier deadlines (blue process) pre-empt (switch out) tasks with later deadlines (green process suspended midway temporarily, then switch back in after blue process finishes).
+    </p>
+    <h5>If EDF has no Preemption</h5>
+    <img src = "image/EDF-no-preemption-example.png" alt = "EDF with no preemption solution" width = "800">
+    <p>
+        Green process starts (r<sub>1</sub>). Blue process arrived (r<sub>2</sub>) but green process continues running until finish because green process can't preempt out of execution. 
+        Blue process starts running after green process finishes, missing its deadline d<sub>2</sub>. 
+        
+    </p>
+    
+    <h4>More Complex Constraints</h4>
+    <h5>Precedance Constraints</h5>
+    <p>
+        For example, for control systems, trying to write software for a car, job 1: start engine has to start before job 2: pump gas.
+    </p>
+    <h5>EDF with Precedence Constraints Old</h5>
+    <img src = "image/precedence-constraints-EDF-old.png" alt = "EDF with Precedence Constraints Old" width = "800">
+    <h5>EDF with Precedence Constraints New</h5>
+    <img src = "image/precedence-constraints-EDF-new.png" alt = "EDF with Precedence Constraints New" width = "800">
+    <ul>
+        <li>
+            EDF scheduler looks at deadline and request time. To include precedence constraints, modify parameters of the original tasks to include the precedent task's constraint.
+        </li>
+        <li>
+            J1 -> J2 (Job 1 has to start and finish before Job 2)
+            <ul>
+                <li>
+                    New request time for J2: r'<sub>2</sub> = max(r<sub>2</sub>, r<sub>1</sub> + C<sub>1</sub>)
+                </li>
+                <li>
+                    New deadline for J1: d'<sub>1</sub> = min(d<sub>1</sub>-C<sub>2</sub>)
+                </li>
+            </ul>
+        </li>
+        <li>
+            If the new schedule with r'<sub>2</sub> and d'<sub>1</sub> is schedulable, original problem is schedulable as well.
+        </li>
+    </ul>
+
+    <h4>Schedulability Analysis</h4>
+    <ul>
+        <li>
+            New tasks appears
+        </li>
+        <li>
+            Let requestor know if it is possible
+        </li>
+        <li>
+            Schedule if possible
+        </li>
+        <li>
+            Reject otherwise
+        </li>
+    </ul>
+    <img src = "image/schedulability-analysis-map.png" alt = "Schedulability Analysis Map" width = "800">
+
+    <h3>Periodic Real-Time Scheduling (Repetitive Tasks)</h3>
+    <h4>
+        Cycle Scheduling
+    </h4>
+    <h4>
+        Rate Monotonic (RM) Scheduling
+    </h4>
+    <h4>
+        Using EDF Scheduler for Periodic Task
+    </h4>
+    
 
 </body>
 </html>
