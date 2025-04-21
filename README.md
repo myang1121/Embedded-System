@@ -1,4 +1,4 @@
-# Embedded-System
+# Embedded System
 This repository contains some of my lab files from my university embedded system course during my Junior Spring semester.
 
 ## Morse Code w/ Assembly Programming
