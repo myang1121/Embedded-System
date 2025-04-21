@@ -1,5 +1,5 @@
 # Embedded-System
-This repository contains my labs from the course ECE3140 Embedded System at Cornell University during my Junior Spring semester.
+This repository contains some of my lab files from my university Embedded System course during my Junior Spring semester.
 
 ## Morse Code w/ Assembly Programming
 The purpose of this lab is to develop assembly language programs for the FRDM-KL46Z microcontroller, which uses an ARM Cortex-M0+ processor operating in Thumb mode (ARM v6-M instruction set). This lab provided hands-on experience with the ARM instruction set and reinforced the importance of following proper ARM calling conventions—especially with regard to saving and restoring registers on the stack. 
